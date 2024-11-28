@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Constraint(
  *   id = "UniqueBusinessName",
- *   label = @Translation("Unique attendees"),
+ *   label = @Translation("Unique business name"),
  * )
  */
 class UniqueBusinessNameConstraint extends Constraint {
@@ -15,6 +15,6 @@ class UniqueBusinessNameConstraint extends Constraint {
   /**
    * @var string
    */
-  public $message = 'The business %name is already exists.';
+  public $message = 'The business name: %name with type: %type is already exists.';
 
 }

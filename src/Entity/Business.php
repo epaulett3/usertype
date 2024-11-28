@@ -6,6 +6,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\RevisionLogEntityTrait;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\user\EntityOwnerInterface;
@@ -20,18 +21,27 @@ use Drupal\user\UserInterface;
  *   label_singular = @Translation("Business"),
  *   label_plural = @Translation("Businesses"),
  *   base_table = "business",
+ *   revision_table = "business_revision",
+ *   revision_metadata_keys = {
+ *     "revision_user" = "revision_author",
+ *     "revision_created" = "revision_created",
+ *     "revision_log_message" = "revision_log_message",
+ *   },
+ *   show_revision_ui = true,
  *   entity_keys = {
  *     "id" = "id",
  *     "uuid" = "uuid",
  *     "label" = "title",
  *     "owner" = "author",
  *     "published" = "published",
+ *     "revision" = "revision_id",
  *   },
  *   handlers = {
  *     "access" = "Drupal\entity\EntityAccessControlHandler",
  *     "permission_provider" = "Drupal\entity\EntityPermissionProvider",
  *     "route_provider" = {
  *       "default" = "Drupal\entity\Routing\DefaultHtmlRouteProvider",
+ *       "revision" = "Drupal\entity\Routing\RevisionRouteProvider",
  *     },
  *     "form" = {
  *       "add" = "Drupal\usertype\Form\BusinessForm",
@@ -50,15 +60,17 @@ use Drupal\user\UserInterface;
  *     "add-form" = "/admin/business/add",
  *     "edit-form" = "/admin/business/manage/{business}",
  *     "delete-form" = "/admin/business/manage/{business}/delete",
- *     "collection" = "/admin/business"
+ *     "collection" = "/admin/business",
+ *     "version-history" = "/admin/business/{business}/revisions",
+ *     "revision" = "/admin/business/{business}/revisions/{business_revision}",
+ *     "revision-revert-form" = "/admin/business/{business}/revisions/{business_revision}/revert",
  *   },
  *   admin_permission = "administer business",
- *   
  * )
  */
 class Business extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
 
-  use EntityOwnerTrait, EntityPublishedTrait;
+  use EntityOwnerTrait, EntityPublishedTrait, RevisionLogEntityTrait;
 
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type)
   {
@@ -71,6 +83,7 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
       ->setRequired(TRUE)
       ->addConstraint('UniqueBusinessName')
       ->setDisplayOptions('form', ['weight' => 0])
+      ->setDisplayOptions('view', ['weight' => 0])
       ->setDisplayConfigurable('form', TRUE);
 
     // Define field: description
@@ -80,34 +93,33 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
           'label' => 'hidden',
           'weight' => 10,
         ])
-      ->setDisplayOptions('form', ['weight' => 20])
+      ->setDisplayOptions('form', ['weight' => 1])
+      ->setDisplayOptions('view', ['weight' => 1])
       // ->setDisplayConfigurable('view', TRUE)
       ->setDisplayConfigurable('form', TRUE);
       // ->setRevisionable(TRUE)
       // ->setTranslatable(TRUE);
     
-    // Define field: website
-    $fields['website'] = BaseFieldDefinition::create('link')
-      ->setLabel(t('Website'))
-      ->setDisplayOptions('form', ['weight' => 30])
-      ->setDisplayConfigurable('form', TRUE)
+    // Define field: website url
+    $fields['website_url'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Website URL'))
+      ->addConstraint('WebsiteUrl')
+      ->setDisplayOptions('form', ['weight' => 2])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'settings' => [
-          'url_only' => true,
-        ],
-        'weight' => 20,
+        'weight' => 2,
       ])
+      ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
 
     // Define field: email
     $fields['email'] = BaseFieldDefinition::create('email')
       ->setLabel(t('Email'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', ['weight' => 40])
+      ->setDisplayOptions('form', ['weight' => 3])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'weight' => 30,
+        'weight' => 3,
       ])
       ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
@@ -117,10 +129,10 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
       ->setLabel(t('Phone Number'))
       ->setDefaultValue('')
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', ['weight' => 50])
+      ->setDisplayOptions('form', ['weight' => 4])
       ->setDisplayOptions('view', [
         'type' => 'telephone_default',
-        'weight' => 40,
+        'weight' => 4,
       ])
       ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
@@ -129,10 +141,10 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     $fields['address_line'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Address Line'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', ['weight' => 60])
+      ->setDisplayOptions('form', ['weight' => 5])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'weight' => 50,
+        'weight' => 5,
       ])
       ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
@@ -141,10 +153,10 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     $fields['city'] = BaseFieldDefinition::create('string')
       ->setLabel(t('City'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', ['weight' => 70])
+      ->setDisplayOptions('form', ['weight' => 6])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'weight' => 60,
+        'weight' => 6,
       ])
       ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
@@ -153,10 +165,10 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     $fields['state'] = BaseFieldDefinition::create('string')
       ->setLabel(t('State or Region'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', ['weight' => 80])
+      ->setDisplayOptions('form', ['weight' => 7])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'weight' => 70,
+        'weight' => 7,
       ])
       ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
@@ -165,10 +177,10 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     $fields['postal_code'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Postal Code'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', ['weight' => 90])
+      ->setDisplayOptions('form', ['weight' => 8])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'weight' => 80,
+        'weight' => 8,
       ])
       ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
@@ -177,22 +189,66 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     $fields['country'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Country'))
       ->setRequired(TRUE)
-      ->setDisplayOptions('form', ['weight' => 90])
+      ->setDisplayOptions('form', ['weight' => 9])
       ->setDisplayOptions('view', [
         'label' => 'inline',
-        'weight' => 80,
+        'weight' => 9,
       ])
       ->setDisplayConfigurable('form', true)
       ->setDisplayConfigurable('view', true);
 
+    // Define field: Users
     $fields['users'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Users'))
       ->setRequired(TRUE)
       ->setSetting('target_type', 'user')
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->addConstraint('UniqueBusinessUsers')
-      ->setDisplayOptions('view', ['weight' => 20])
-      ->setDisplayOptions('form', ['weight' => 27])
+      ->setDisplayOptions('view', ['weight' => 10])
+      ->setDisplayOptions('form', ['weight' => 10])
+      ->setDisplayConfigurable('view', TRUE);
+
+    // Define field: Parent Business
+    $fields['parent_business'] = BaseFieldDefinition::create('entity_reference')
+      ->setLabel(t('Parent Business'))
+      ->setSetting('target_type', 'business')
+      ->setDisplayOptions('view', ['weight' => 11])
+      ->setDisplayOptions('form', ['weight' => 11])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    // Define field: Business Type
+    $fields['business_type'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Business Type'))
+      ->setRequired(TRUE)
+      ->setSettings([
+        'allowed_values' => [
+          'sole_proprietor' => t('Sole Proprietor'),
+          'llc' => t('LLC'),
+          'inc' => t('INC'),
+          'llp' => t('LLP'),
+        ],
+      ])
+      ->setDefaultValue('sole_proprietor')
+      ->setDisplayOptions('view', ['weight' => 12])
+      ->setDisplayOptions('form', ['weight' => 12])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    // Define field: Profit Type
+    $fields['profit_type'] = BaseFieldDefinition::create('list_string')
+      ->setLabel(t('Profit Type'))
+      ->setRequired(TRUE)
+      ->setSettings([
+        'allowed_values' => [
+          'profit' => t('Profit'),
+          'nonprofit' => t('Nonprofit'),
+        ],
+      ])
+      ->setDefaultValue('profit')
+      ->setDisplayOptions('view', ['weight' => 13])
+      ->setDisplayOptions('form', ['weight' => 13])
+      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     // Get the field definitions for 'author' and 'published' from the trait.
@@ -207,6 +263,7 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     // ])
     // ->setTranslatable(TRUE);
 
+    $fields += static::revisionLogBaseFieldDefinitions($entity_type);
 
     return $fields;
   }
@@ -227,11 +284,11 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     return $this->set('title', $title);
   }
 
-    /**
-     * @return \Drupal\filter\Render\FilteredMarkup
-     */
-    public function getDescription() {
-      return $this->get('description')->processed;
+  /**
+   * @return \Drupal\filter\Render\FilteredMarkup
+   */
+  public function getDescription() {
+    return $this->get('description')->processed;
   }
   
   /**
@@ -306,6 +363,34 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     }
     $field_items->filterEmptyItems();
     return $this;
+  }
+
+  /**
+   * @return string
+   */
+  public function getBusinessType() {
+    return $this->get('business_type')->value;
+  }
+
+  /**
+   * @param string $business_type
+   *
+   * @return $this
+   */
+  public function setBusinessType($business_type) {
+    return $this->set('business_type', $business_type);
+  }
+
+  /**
+   * @return string
+   */
+  public function getBusinessTypeDisplay() {
+    $business_type = $this->get('business_type')->value;
+    if ($business_type === 'sole_proprietor') {
+      return ucwords(str_replace('_', ' ', $business_type));
+    } else {
+      return strtoupper($business_type);
+    }
   }
 
 }

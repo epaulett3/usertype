@@ -12,6 +12,7 @@ class BusinessListBuilder extends EntityListBuilder {
     $header['title'] = $this->t('Business Name');
     // $header['date'] = $this->t('Date');
     // $header['published'] = $this->t('Published');
+    $header['business_type'] = $this->t('Business Type');
     return $header + parent::buildHeader();
   }
 
@@ -21,6 +22,7 @@ class BusinessListBuilder extends EntityListBuilder {
     $row['title'] = $business->getTitle();
     // $row['date'] = $usertype->getDate()->format('m/d/y h:i:s a');
     // $row['published'] = $business->isPublished() ? $this->t('Yes') : $this->t('No');
+    $row['business_type'] = $business->getBusinessTypeDisplay();
     return $row + parent::buildRow($business);
   }
 
