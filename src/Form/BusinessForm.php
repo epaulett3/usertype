@@ -5,7 +5,7 @@ namespace Drupal\usertype\Form;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 
-class UserTypeBusinessForm extends ContentEntityForm {
+class BusinessForm extends ContentEntityForm {
 
   public function save(array $form, FormStateInterface $form_state) {
     parent::save($form, $form_state);
