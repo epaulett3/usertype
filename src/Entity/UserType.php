@@ -23,7 +23,6 @@ use Drupal\user\EntityOwnerTrait;
  *     "uuid" = "uuid",
  *     "label" = "title",
  *     "owner" = "author",
- *     "published" = "published",
  *   },
  *   handlers = {
  *     "access" = "Drupal\entity\EntityAccessControlHandler",
@@ -81,16 +80,6 @@ class UserType extends ContentEntityBase implements EntityOwnerInterface, Entity
 
     // Get the field definitions for 'author' and 'published' from the trait.
     $fields += static::ownerBaseFieldDefinitions($entity_type);
-    $fields += static::publishedBaseFieldDefinitions($entity_type);
-
-    $fields['published']->setDisplayOptions('form', [
-      'settings' => [
-        'display_label' => TRUE,
-      ],
-      'weight' => 30,
-    ])
-    ->setTranslatable(TRUE);
-
 
     return $fields;
   }
