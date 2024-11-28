@@ -7,4 +7,3 @@ dependencies:
   - drupal:user
   - entity:entity
   - drupal:telephone
-
