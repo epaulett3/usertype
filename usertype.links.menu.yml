@@ -1,0 +1,11 @@
+entity.usertype.collection:
+  title: 'User Types'
+  route_name: entity.usertype.collection
+  description: "Add user types"
+  parent: entity.user.collection
+
+entity.usertype_business.collection:
+  title: 'Business'
+  route_name: entity.usertype_business.collection
+  parent: system.admin
+  weight: 5

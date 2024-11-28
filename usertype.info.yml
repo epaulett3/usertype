@@ -1,0 +1,10 @@
+name: User Type
+description: "Adds a User Type and Business entity for Users"
+type: module
+core_version_requirement: ^9.5 || ^10 || ^11
+package: Custom
+dependencies:
+  - drupal:user
+  - entity:entity
+  - drupal:telephone
+
