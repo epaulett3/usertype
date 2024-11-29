@@ -55,17 +55,26 @@ use Drupal\user\EntityOwnerTrait;
 class UserType extends ContentEntityBase implements EntityOwnerInterface, EntityPublishedInterface {
   use EntityOwnerTrait, EntityPublishedTrait;
 
+  /**
+   * Define fields here
+   * 
+   * @param EntityTypeInterface $entity_type
+   * 
+   * @return [type]
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type)
   {
     // get the field definations for 'id' and 'uuid' from the parent.
     $fields = parent::baseFieldDefinitions($entity_type);
 
+    // define field: title
     $fields['title'] = BaseFieldDefinition::create('string')
       -> setLabel(t('Title'))
       ->setRequired(TRUE)
       ->setDisplayOptions('form', ['weight' => 0])
       ->setDisplayConfigurable('form', TRUE);
 
+    // define field: description
     $fields['description'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Description'))
       ->setDisplayOptions('view', [
@@ -85,6 +94,8 @@ class UserType extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * Get the value of the title field
+   * 
    * @return string
    */
   public function getTitle() {
@@ -92,6 +103,8 @@ class UserType extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * set the value of the title field
+   * 
    * @param string $title
    *
    * @return $this
@@ -101,6 +114,8 @@ class UserType extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
     /**
+     * get the description
+     * 
      * @return \Drupal\filter\Render\FilteredMarkup
      */
     public function getDescription() {
@@ -108,6 +123,8 @@ class UserType extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
   
   /**
+   * Set the description
+   * 
    * @param string $description
    * @param string $format
    *

@@ -7,6 +7,13 @@ use Drupal\Core\Form\FormStateInterface;
 
 class UserTypeForm extends ContentEntityForm {
 
+  /**
+   * Save function.
+   * 
+   * @param array $form
+   * @param FormStateInterface $form_state
+   * 
+   */
   public function save(array $form, FormStateInterface $form_state) {
     parent::save($form, $form_state);
 

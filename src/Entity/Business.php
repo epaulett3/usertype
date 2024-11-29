@@ -72,6 +72,13 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
 
   use EntityOwnerTrait, EntityPublishedTrait, RevisionLogEntityTrait;
 
+  /**
+   * Define fields for this entity
+   * 
+   * @param EntityTypeInterface $entity_type
+   * 
+   * @return [type]
+   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type)
   {
     // get the field definations for 'id' and 'uuid' from the parent.
@@ -296,6 +303,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * Get value of the title field
+   * 
    * @return string
    */
   public function getTitle() {
@@ -303,6 +312,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * set the value of the title field
+   * 
    * @param string $title
    *
    * @return $this
@@ -312,6 +323,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * get the value of the description field
+   * 
    * @return \Drupal\filter\Render\FilteredMarkup
    */
   public function getDescription() {
@@ -319,6 +332,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
   
   /**
+   * set the value of the description field
+   * 
    * @param string $description
    * @param string $format
    *
@@ -332,6 +347,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * get the value of the website field
+   * 
    * @return string
    */
   public function getWebsite() {
@@ -339,6 +356,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * set the value of the website field
+   * 
    * @param string $website
    *
    * @return $this
@@ -348,6 +367,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * get the users (referenced entity)
+   * 
    * @return \Drupal\user\UserInterface[]
    */
   public function getUsers() {
@@ -355,6 +376,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * add a user
+   * 
    * @param \Drupal\user\UserInterface $user
    *
    * @return $this
@@ -377,6 +400,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * Remove a user
+   * 
    * @param \Drupal\user\UserInterface $user
    *
    * @return $this
@@ -393,6 +418,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * get business type
+   * 
    * @return string
    */
   public function getBusinessType() {
@@ -400,6 +427,8 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
+   * set business type
+   * 
    * @param string $business_type
    *
    * @return $this
@@ -421,9 +450,10 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
   }
 
   /**
-   * an array of telephone country codes
+   * an array of telephone country codes. 
+   * filtered to be used as value for List field types
    * 
-   * @return [type]
+   * @return array
    */
   public static function getCountryCodes(){
     $countryCodes = self::countryCodes();
@@ -434,6 +464,11 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
     return $return;
   }
 
+  /**
+   * an array of telephone country codes with country names
+   * 
+   * @return array
+   */
   public static function countryCodes(){
     return [
       ["country" => "Afghanistan","code" => "93","iso" => "AF"],
