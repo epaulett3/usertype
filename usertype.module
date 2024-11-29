@@ -1,0 +1,35 @@
+<?php 
+
+// namespace Drupal\usertype;
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * adds input attributes to the phone field of business form
+ * 
+ * 
+ * @param mixed $form
+ * @param FormStateInterface $form_state
+ * @param mixed $form_id
+ * 
+ * @return [type]
+ */
+function usertype_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // \Drupal::messenger()->addMessage( t("form_id of this form is @id", ['@id' => $form_id]) );
+  
+  $formObject = $form_state->getFormObject();
+  if ($formObject instanceof \Drupal\Core\Entity\EntityFormInterface) {
+    $entity = $formObject->getEntity();
+    if ( $entity->getEntityTypeId() === 'business') {
+      // attached js phone-formatter.js to the form page
+      $form['#attached']['library'][] = 'usertype/usertype_library';
+      // modify and add attributes to phone_number
+      $form['phone_number']['widget'][0]['value']['#attributes']['placeholder'] = '(555) 555-5555';
+      $form['phone_number']['widget'][0]['value']['#attributes']['inputmode'] = 'numeric';
+      $form['phone_number']['widget'][0]['value']['#attributes']['pattern'] = '\(\d{3}\) (\d{3})-(\d{4})';
+      $form['phone_number']['widget'][0]['value']['#attributes']['class'][] = 'cu-phone-formatted';
+      $form['phone_number']['widget'][0]['value']['#maxlength'] = '14';
+    }
+  }  
+
+}

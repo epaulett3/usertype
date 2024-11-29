@@ -148,7 +148,7 @@ class Business extends ContentEntityBase implements EntityOwnerInterface, Entity
       ->setDisplayConfigurable('view', true);
     
     // Define field: phone number
-    $fields['phone_number'] = BaseFieldDefinition::create('integer')
+    $fields['phone_number'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Phone Number'))
       ->setDefaultValue('')
       ->setRequired(TRUE)

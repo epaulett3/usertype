@@ -1,0 +1,3 @@
+usertype_library:
+  js:
+    js/phone-formatter.js: {}
